@@ -1,0 +1,38 @@
+# 密钥 / 环境变量（绝对不要提交）
+.env
+.env.*
+*.key
+*.pem
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# 虚拟环境
+venv/
+.venv/
+env/
+ENV/
+Miniconda3/
+
+# 大文件：GitHub 单文件硬上限 100MB，别传
+*.pt
+*.pth
+*.onnx
+*.engine
+*.h5
+*.ckpt
+*.7z
+*.zip
+
+# 训练产物 / 数据集（体积大且可重新生成）
+runs/
+datasets/
+my_model/
+
+# IDE / 系统
+.idea/
+.DS_Store
+Thumbs.db

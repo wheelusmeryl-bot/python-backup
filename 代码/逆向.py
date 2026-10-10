@@ -1,0 +1,15 @@
+import libnum
+from Crypto.Util.number import *
+
+p = 177077389675257695042507998165006460849
+c = 2373740699529364991763589324200093466206785561836101840381622237225512234632
+q = 211330365658290458913359957704294614589
+n = 37421829509887796274897162249367329400988647145613325367337968063341372726061
+phi = (p-1)*(q-1)
+
+for e in range(50000,70000):
+    if (libnum.gcd(e,phi) == 1):
+        d = libnum.invmod(e,phi)
+        flag = long_to_bytes(pow(c, d, n)).decode('utf-8', errors='ignore')
+        if 'flag' in flag:
+            print(flag)

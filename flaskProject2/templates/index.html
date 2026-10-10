@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YOLOv8实时检测</title>
+</head>
+<body>
+    <h1>YOLOv8实时目标检测</h1>
+        <img
+        id="video_feed"
+        src="http://192.168.10.251:5000/video_feed"
+        width="640"
+        height="480"
+        crossorigin="anonymous">
+    <div id="fps">FPS: 0</div>
+    <script>
+        let lastTime = Date.now();
+        const fpsElement = document.getElementById('fps');
+
+        setInterval(() => {
+            const now = Date.now();
+            const fps = Math.round(1000 / (now - lastTime));
+            fpsElement.textContent = `FPS: ${fps}`;
+            lastTime = now;
+        }, 1000);
+    </script>
+</body>
+</html>

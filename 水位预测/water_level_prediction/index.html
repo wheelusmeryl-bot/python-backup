@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水位预测系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .main-container {
+            display: flex;
+            gap: 20px;
+        }
+        .left-panel {
+            flex: 1;
+        }
+        .right-panel {
+            flex: 1;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .section-title {
+            text-align: center;
+            font-weight: bold;
+            font-family: 'SimHei', '黑体', sans-serif;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .left-title {
+            font-size: 24px;
+        }
+        .right-title {
+            font-size: 24px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background-color: #dff0d8;
+            border: 1px solid #d6e9c6;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            border: 1px solid #ebccd1;
+            color: #a94442;
+        }
+         .warning {
+            font-size: 22px;
+            font-weight: bolder;
+            text-align: center;
+            margin: 15px 0;
+        }
+        .red { color: #ff0000; }
+        .orange { color: #ffa500; }
+        .yellow { color: #ffff00; }
+        .blue { color: #0000ff; }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+        }
+        iframe {
+            width: 100%;
+            height: 700px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌊 AI智慧水位“四预”平台</h1>
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="container">
+                <h2 class="section-title left-title">🧠 神经网络预报预警</h2>
+                <div class="input-group">
+                    <label for="dataInput">请输入水位数据：</label>
+                    <input type="text" id="dataInput" placeholder="例如: 1.0 2.0 3.0 ... 16.0">
+                </div>
+                <button onclick="predict()">开始预测</button>
+                <div id="result" class="result"></div>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div class="container">
+                <h2 class="section-title right-title">🤖 AI大模型预演预案</h2>
+                <iframe
+                    src="https://udify.app/chatbot/7HUOdEhwdTR2azxM"
+                    frameborder="0"
+                    allow="microphone">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function predict() {
+            const input = document.getElementById('dataInput');
+            const resultDiv = document.getElementById('result');
+
+            try {
+                // 解析输入数据
+                const data = input.value.trim().split(' ').map(Number);
+
+                // 验证输入
+                if (data.length < 16 || data.some(isNaN)) {
+                    throw new Error('请输入至少16个有效的数值，用空格分隔');
+                }
+
+                // 发送请求到后端
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ data: data })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || '预测失败');
+                }
+
+                // 显示结果
+                resultDiv.className = 'result success';
+                resultDiv.style.display = 'block';
+
+                // 构建结果HTML
+                let html = `<h3>预测结果:</h3>`;
+                html += `<p><strong>预测水位(cm):</strong> [${result.predictions.map(x => x.toFixed(2)).join(', ')}]</p>`;
+
+                if (result.relative_errors.length > 0) {
+                    html += `<p><strong>预测相对误差:</strong> [${result.relative_errors.map(x => x.toFixed(2) + '%').join(', ')}]</p>`;
+                }
+
+                // 预警信息
+                let warningClass = '';
+                if (result.warning === '红色预警') warningClass = 'red';
+                else if (result.warning === '橙色预警') warningClass = 'orange';
+                else if (result.warning === '黄色预警') warningClass = 'yellow';
+                else warningClass = 'blue';
+
+                html += `<div class="warning ${warningClass}">${result.warning}</div>`;
+
+
+                // 显示图表
+                html += `<img src="data:image/png;base64,${result.plot}" alt="预测结果图">`;
+
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<strong>错误:</strong> ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
